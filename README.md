@@ -48,7 +48,7 @@ myDanki = DAnki(language, csv_filepath, deck_name, from_kindle)
 myDanki.create_translated_deck()
 ```
 
-*You can find the csv exemple files [HERE](https://github.com/dileivas/DAnki/tree/master/csv_exemple_files).*
+*You can find the csv exemple files [HERE](https://github.com/dileivas/DAnki/tree/master/DAnki/csv_exemple_files).*
 
 ## Available languages
 
