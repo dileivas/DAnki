@@ -50,13 +50,6 @@ myDanki.create_translated_deck()
 
 *You can find the csv exemple files [HERE](https://github.com/dileivas/DAnki/tree/master/DAnki/csv_exemple_files).*
 
-## Available languages
-
-DAnki uses [leo.org](leo.org) to find a translation from german, so the available languages are:
-
-('pt' - portuguese) ('en' - english) ('fr' - french) ('es' - spanich) 
-('it' - italian) ('ch' - chinese) ('ru' - russian) ('pl' - polish)
-
 ## Musts
 
 ### German Dictionary for enchant - hunspell
@@ -73,9 +66,9 @@ If you are using Jupyter, the path to add the files is below:
 
 `C:\ProgramData\Anaconda3\Lib\site-packages\enchant\data\mingw64\share\enchant\hunspell`
 
-Dictionary link:  https://extensions.openoffice.org/en/project/german-de-de-frami-dictionaries
+Dictionary link [HERE](https://extensions.openoffice.org/en/project/german-de-de-frami-dictionaries).
 
-For more information about enchant: https://pyenchant.github.io/pyenchant/tutorial.html
+For more information about enchant click [HERE](https://pyenchant.github.io/pyenchant/tutorial.html).
 
 ### TreeTagger Programm
 
@@ -86,26 +79,54 @@ is 'lesen'. DAnki searches for translations using the word's lemma. In program, 
 
 `Word: las | Word class: VVFIN | Without Declination: lesen `
 
-You can find a table with these "Word class" [HERE](https://universaldependencies.org/tagset-conversion/de-stts-uposf.html)
+You can find a table with these "Word classes" [HERE](https://universaldependencies.org/tagset-conversion/de-stts-uposf.html)
 
-So, to make that work, we must install TreeTagger. Here follows a small tutorial:
+The package *treetaggerwrapper* is a form to use TreeTagger in python.
 
-1) 
+So, to make all this magic works, we must install TreeTagger. Here follows a small tutorial for *Windows*. If you are not using
+Windows, please follow [THIS](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger) tutorial.
+
+1) Download TreeTagger : [64bits](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/data/tree-tagger-windows-3.2.2.zip) or [32bits](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/data/tree-tagger-windows32-3.2.2.zip).
+
+2) Extract the zip file and move the TreeTagger directory to the root directory of drive C:\.
+
+3) Install a Perl interpreter (if you have not already installed one). You can download it for Windows for free [HERE](http://www.activestate.com/activeperl/).
+
+4) Add the path `C:\TreeTagger\bin` to the "Path" environment variable. [HERE](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/) is a step-by-step tutorial how to do that.
+
+5) You can test TreeTagger opening the command prompt (cmd) and typing `cd C:\TreeTagger` than `tag-english INSTALL.txt`. It should
+start tagging the INSTALL.txt file from TreeTagger.
+
+6) Download the [German Paramater file](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/data/german.par.gz) and extract the
+'*german.par*' file to:
+
+`C:\TreeTagger\lib`
+
+7) Now you can finally use DAnki! 
+
+## Available languages
+
+DAnki uses [leo.org](leo.org) to find a translation from german, so the available languages are:
+
+('pt' - portuguese) ('en' - english) ('fr' - french) ('es' - spanich) 
+('it' - italian) ('ch' - chinese) ('ru' - russian) ('pl' - polish)
 
 ## Credits
 
-My thanks to:
+### My thanks to:
 
 [genanki](https://github.com/kerrickstaley/genanki)
 
-[HanTa](https://github.com/wartaal/HanTa) - I don't use this library, but allowed me to understand lemmatization.
-
-[Vorverarbeitung von Texten mit Python und NLTK](http://textmining.wp.hs-hannover.de/Preprocessing.html)
-
-[Tagset DE] (https://universaldependencies.org/tagset-conversion/de-stts-uposf.html)
+[TreeTagger](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/)
 
 [treetaggerwrapper](https://treetaggerwrapper.readthedocs.io/en/)
 
 [gTTS](https://github.com/pndurette/gTTS)
 
 [LEO GmbH](leo.org)
+
+[Christian Wartena (2019). A Probabilistic Morphology Model for German Lemmatization. In: Proceedings of the 15th Conference on Natural Language Processing (KONVENS 2019): Long Papers. Pp. 40-49, Erlangen.](https://corpora.linguistik.uni-erlangen.de/data/konvens/proceedings/papers/KONVENS2019_paper_10.pdf)
+
+[Vorverarbeitung von Texten mit Python und NLTK](http://textmining.wp.hs-hannover.de/Preprocessing.html)
+
+[Tagset DE](https://universaldependencies.org/tagset-conversion/de-stts-uposf.html)
