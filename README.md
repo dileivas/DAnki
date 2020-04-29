@@ -40,6 +40,13 @@ myDanki.create_translated_deck()
 
 *You can find the csv exemple files [HERE](https://github.com/dileivas/DAnki/tree/master/csv_exemple_files).*
 
+## Available languages
+
+DAnki uses [leo.org](leo.org) to find a translation from german, so the available languages are:
+
+('pt' - portuguese) ('en' - english) ('fr' - french) ('es' - spanich) 
+('it' - italian) ('ch' - chinese) ('ru' - russian) ('pl' - polish)
+
 ## Must
 
 You must add 'de_DE_frami.dic' and 'de_DE_frami.aff' files in 
