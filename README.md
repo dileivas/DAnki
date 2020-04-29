@@ -38,7 +38,7 @@ myDanki = DAnki(language, csv_filepath, deck_name, from_kindle)
 myDanki.create_translated_deck()
 ```
 
-*You can find the csv exemple files HERE.*
+*You can find the csv exemple files [HERE](https://github.com/dileivas/DAnki/tree/master/csv_exemple_files).*
 
 ## Must
 
@@ -51,8 +51,13 @@ For more information: https://pyenchant.github.io/pyenchant/tutorial.html
 My thanks to:
 
 [genanki](https://github.com/kerrickstaley/genanki)
+
 [HanTa](https://github.com/wartaal/HanTa) - I don't use this library, but allowed me to understand lemmatization.
+
 [Vorverarbeitung von Texten mit Python und NLTK](http://textmining.wp.hs-hannover.de/Preprocessing.html)
+
 [treetaggerwrapper](https://treetaggerwrapper.readthedocs.io/en/)
+
 [gTTS](https://github.com/pndurette/gTTS)
+
 [LEO GmbH](leo.org)
