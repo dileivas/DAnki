@@ -12,11 +12,19 @@ with this program. It also create tags for Anki with the page number.
 
 *Note:* Your Kindle's language must be in *portuguese* or *english* .
 
+## Installation
+
+```python
+pip install DAnki
+```
+
 ## How to use
 
 Here is an exemple using a csv file from kindle.
 
 ```python
+from DAnki import DAnki
+
 language = 'en'
 csv_filepath = r'csv_exemple_files/sherlock_highlights_from_kindle_english.csv'
 deck_name = 'sherlock_en'
@@ -29,6 +37,8 @@ myDanki.create_translated_deck()
 Here is an exemple using a csv file with only 2 columns: German Word and Tag.
 
 ```python
+from DAnki import DAnki
+
 language = 'ch'
 csv_filepath = r'csv_exemple_files/not_from_kindle.csv'
 deck_name = 'not_from_kindle'
