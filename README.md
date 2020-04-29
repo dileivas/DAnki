@@ -42,8 +42,11 @@ myDanki.create_translated_deck()
 
 ## Must
 
-You must add 'de_DE_frami.dic' and 'de_DE_frami.aff' files in `C:\Users\user\AppData\Local\Programs\Python\Python38\lib\site-packages\enchant\data\mingw64\share\enchant\hunspell`
+You must add 'de_DE_frami.dic' and 'de_DE_frami.aff' files in 
+`C:\Users\user\AppData\Local\Programs\Python\Python38\lib\site-packages\enchant\data\mingw64\share\enchant\hunspell`
+
 Dictionary link:  https://extensions.openoffice.org/en/project/german-de-de-frami-dictionaries
+
 For more information: https://pyenchant.github.io/pyenchant/tutorial.html
 
 ## Credits
