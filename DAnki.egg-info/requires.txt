@@ -1,0 +1,9 @@
+pandas
+googletrans
+pyenchant
+requests
+bs4
+treetaggerwrapper
+unicodedata
+gtts
+genanki

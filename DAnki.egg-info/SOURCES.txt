@@ -1,0 +1,9 @@
+README.md
+setup.py
+DAnki/DAnki.py
+DAnki/exemples.py
+DAnki.egg-info/PKG-INFO
+DAnki.egg-info/SOURCES.txt
+DAnki.egg-info/dependency_links.txt
+DAnki.egg-info/requires.txt
+DAnki.egg-info/top_level.txt
