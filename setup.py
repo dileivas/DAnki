@@ -13,6 +13,7 @@ setup(
     version="1.0.0",
     description="Automate deck creation for Anki to learn german",
     long_description=README,
+    long_description_content_type="text/markdown",
     url="https://github.com/dileivas/DAnki",
     author="Diego Leivas",
     author_email="dileivas@hotmail.com",
