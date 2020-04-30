@@ -20,7 +20,7 @@ pip install DAnki
 
 ## How to use
 
-Here is an exemple using a csv file from kindle.
+Here is an example using a csv file from kindle.
 
 ```python
 from DAnki.DAnki import DAnki
