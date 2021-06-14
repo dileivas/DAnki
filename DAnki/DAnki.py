@@ -9,6 +9,8 @@ from gtts import gTTS
 import os
 import genanki
 import random
+from random import randrange
+from time import sleep
 
 class DAnki(object):
     def __init__(self, 
@@ -16,7 +18,7 @@ class DAnki(object):
                 csv_filepath,
                 deck_name,
                 from_kindle = True,
-                prefix_list = ['ein', 'aus','auf', 'fern', 'mit', 'ab', 'an', 'zu','vor'],
+                prefix_list = ['hin', 'an', 'nach', 'los', 'auf', 'ab', 'her', 'aus', 'ein', 'bei', 'zu', 'mit', 'vor', 'zurück', 'weg','herunter','hinunter','herauf','hinauf','herein','hinein','heraus','hinaus','herüber','hinüber'],
                 noun_list = ['NN','NE'],
                 verb_list = ['VVFIN','VMFIN','VAFIN','VVINF','VVPP','VVIZU'],
                 adjective_adverb_list = ['ADV','ADJD','PIAT','ADJA','PAV'],
@@ -95,8 +97,10 @@ class DAnki(object):
             os.mkdir(dirName)
             print(f'\n{dirName} created!\n')
 
+        text = text.replace('Pl.:', '. Plural:').replace('Pl., kein Sg.', '').replace('kein Pl.','')
+
         speech_audio_obj = gTTS(text=text, lang='de', slow=False)  
-        speech_audio_obj.save(f"{dirName}\speech_audio_{audio_increment}.mp3")
+        speech_audio_obj.save(f"{dirName}\\speech_audio_{audio_increment}.mp3")
         
         audio_file_name = f'[sound:speech_audio_{audio_increment}.mp3]'
         
@@ -117,28 +121,37 @@ class DAnki(object):
         self.df_main_table.loc[row,'word_class'] = word_class
         self.df_main_table.loc[row,'translation'] = translation
 
-    def find_tremmbar_complement(self, word, row, df):
+    def find_trennbar_complement(self, word, row, df):
         #Must add 'de_DE_frami.dic' and 'de_DE_frami.aff' files in C:\Users\user\AppData\Local\Programs\Python\Python38\lib\site-packages\enchant\data\mingw64\share\enchant\hunspell
         #Dictionary link:  https://extensions.openoffice.org/en/project/german-de-de-frami-dictionaries
         #For more information: https://pyenchant.github.io/pyenchant/tutorial.html
         print(f'\nPREFIX DETECTED: {word}')
         roll_back = row - 1
         previous_word = df.loc[roll_back,'deutsch']
-        tremmbar = word + previous_word
-        print(tremmbar)
-        while enchant.Dict('de_DE_frami').check(tremmbar) == False:
+        trennbar = word + previous_word
+        print(trennbar)
+
+        while enchant.Dict('de_DE_frami').check(trennbar) == False:
             roll_back = roll_back - 1
-            if roll_back == (row - 5):
-                print(f'\n Tremmbar for {word} not found!')
+            if roll_back == (row - 6):
+                print(f'\n trennbar for {word} not found!')
                 print(f'Adopting {word} as word!')
-                tremmbar = word
+                trennbar = word
                 break
             else:
                 previous_word = df.loc[roll_back,'deutsch']
-                tremmbar = word+previous_word
-                print(tremmbar)
+                trennbar = word+previous_word
+                print(trennbar)
         print('')
-        return tremmbar
+
+        if enchant.Dict('de_DE_frami').check(trennbar) == True:
+            excluded_word = self.df_main_table.loc[roll_back,'word']
+            print(f'Line with word "{excluded_word}" that was a trennbar verb without prefix was deleted!\n')
+            self.df_main_table = self.df_main_table.drop([roll_back])
+        else:
+            pass
+
+        return trennbar
 
     def tag_word(self,word):
         tags = treetaggerwrapper.TreeTagger(TAGLANG='de').tag_text(word)
@@ -217,10 +230,27 @@ class DAnki(object):
             elif lang == 'pl':
                 lang_site = 'polnisch-deutsch'
         except UnboundLocalError: 
-            print('Error: Please choose one lang available!') #Não tá funcionando ainda
+            print('Error: Please choose one lang available!') #Not working yet - how to fix?
             raise
 
-        html = requests.get(f'https://dict.leo.org/{lang_site}/{lemma}', stream=True)
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
+        html = requests.get(f'https://dict.leo.org/{lang_site}/{lemma}', headers=headers, stream=True)
+
+        if html.status_code == 429:
+            sleep_seconds = 1500
+            while html.status_code == 429:
+                print(f'Too many requests! Sleeping for {sleep_seconds} seconds...')
+                seconds_count = sleep_seconds
+                while seconds_count > 0:
+                    print(f'Countdown: {seconds_count}s... ')
+                    sleep(1)
+                    seconds_count -= 1
+                html = requests.get(f'https://dict.leo.org/{lang_site}/{lemma}', headers=headers, stream=True)
+                sleep_seconds = sleep_seconds/150
+            
+        else:
+            pass
+
         if html.status_code != 200:
             print(f'\nConnection error for word {lemma}: {html.status_code}')
             print(f'Trying again for word {word}')
@@ -240,10 +270,10 @@ class DAnki(object):
         else:
             lemma, translation = self.leo_parser(lang, html, lemma, table_name)
             self.save_word(row, word, tag, lemma, word_class, translation)
+        return lemma
 
     def create_main_table(self):
         df = self.openCSV()
-
         audio_increment = 0
 
         for row in df.index:
@@ -261,34 +291,46 @@ class DAnki(object):
                 self.save_word(row, word, tag, lemma, word_class, translation)
             else:
                 if word in self.prefix_list:
-                    word = self.find_tremmbar_complement(word, row, df)
+                    word = self.find_trennbar_complement(word, row, df)
                     word_class, lemma = self.tag_word(word)
                 else:
                     word_class, lemma = self.tag_word(word)
 
-                print(f'Word: {word} | Word class: {word_class} | Without Declination: {lemma} | Audio #: {audio_increment}')
+                # print(f'Word: {word} | Word class: {word_class} | Without Declination: {lemma} | Audio #: {audio_increment}')
 
-                audio_increment = self.get_audio(row, lemma, audio_increment)
+                # audio_increment = self.get_audio(row, lemma, audio_increment)
 
                 if word_class in self.noun_list:
                     table_name = 'Substantive'
-                    self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    deutsch_word_in_leo = self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    audio_increment = self.get_audio(row, deutsch_word_in_leo, audio_increment)
+                    print(f'Word: {word} | Word class: {word_class} | Without Declination: {deutsch_word_in_leo} | Audio #: {audio_increment-1}')
+                    
 
                 elif word_class in self.verb_list:
                     table_name = 'Verben'
-                    self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    deutsch_word_in_leo = self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    audio_increment = self.get_audio(row, lemma, audio_increment)
+                    print(f'Word: {word} | Word class: {word_class} | Without Declination: {lemma} | Audio #: {audio_increment-1}')
 
                 elif word_class in self.adjective_adverb_list:
                     table_name = 'Adjektive / Adverbien'
-                    self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    deutsch_word_in_leo = self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    audio_increment = self.get_audio(row, lemma, audio_increment)
+                    print(f'Word: {word} | Word class: {word_class} | Without Declination: {lemma} | Audio #: {audio_increment-1}')
 
                 elif word_class in self.preposition_list:
                     table_name = 'Präpositionen / Pronomen / ...'
-                    self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    deutsch_word_in_leo = self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    audio_increment = self.get_audio(row, lemma, audio_increment)
+                    print(f'Word: {word} | Word class: {word_class} | Without Declination: {lemma} | Audio #: {audio_increment-1}')
 
                 else:
                     translation = 'not found'
-                    self.save_word(row, word, tag, lemma, word_class, translation)
+                    deutsch_word_in_leo = self.search_leo_de(self.language, row, table_name, word, tag, lemma, word_class)
+                    audio_increment = self.get_audio(row, lemma, audio_increment)
+                    print(f'Word: {word} | Word class: {word_class} | Without Declination: {lemma} | Audio #: {audio_increment-1}')
+        self.df_main_table = self.df_main_table.reset_index(drop = True)
 
     def create_deck_ids(self):
         if self.model_id == None:
@@ -391,6 +433,102 @@ class DAnki(object):
         self.create_model()
         self.save_deck()
         print('\nYour new deck was successfully created!')
-        print(f'You can find your deck in {dirName}\output_decks\ ')
-        print(f'And your audio files in {dirName}\audio_files\ \n')
+        print(f'You can find your deck in {dirName}\\output_decks\\ ')
+        print(f'And your audio files in {dirName}\\audio_files\\ \n')
+        print('Enjoy! ;D')
+
+    def create_kahoot_templates_for_each_tag(self):
+        currentDirectory = os.getcwd()
+        kahoot_templates_path = f'{currentDirectory}\\kahoot_templates\\'
+
+        if not os.path.exists(kahoot_templates_path):
+            os.mkdir(kahoot_templates_path)
+            print(f'\n{kahoot_templates_path} created!\n')
+
+        tags_list = list(self.df_main_table['tag'].unique())
+
+        for tag in tags_list:
+            print(f'\nCreating Kahoot for {tag}...')
+            main_table_aux = self.df_main_table[(self.df_main_table['tag']==tag) & (self.df_main_table['translation'].str!='not found')]
+            
+            if len(main_table_aux.index) < 4:
+                print(f'Too few words to create Kahoot for {tag}')
+                continue
+                
+            else:
+                df_kahoot_template = pd.DataFrame(columns=['Question - max 120 characters','Answer 1 - max 75 characters','Answer 2 - max 75 characters','Answer 3 - max 75 characters','Answer 4 - max 75 characters','Time limit (sec) – 5, 10, 20, 30, 60, 90, 120, or 240 secs','Correct answer(s) - choose at least one'])
+
+                for row in main_table_aux.index:
+
+                    random_number = randrange(1,5)
+
+                    question = main_table_aux.loc[row,'without_declination'][:120]
+                    correct_answer = main_table_aux.loc[row,'translation'].replace('<br>','')[:75]
+                    time_to_answer = 10
+
+                    data = {'Question - max 120 characters': [question],
+                           'Answer 1 - max 75 characters': ['1'],
+                            'Answer 2 - max 75 characters': ['2'],
+                            'Answer 3 - max 75 characters': ['3'],
+                            'Answer 4 - max 75 characters': ['4'],
+                            'Time limit (sec) – 5, 10, 20, 30, 60, 90, 120, or 240 secs': [time_to_answer],
+                            'Correct answer(s) - choose at least one': [random_number]   
+                           }
+
+                    df_aux = pd.DataFrame(data)
+
+                    df_answers = main_table_aux.copy()
+                    df_answers = df_answers.drop(row).reset_index(drop = True)
+
+                    randon_answers_numbers_list=[]
+
+                    wrong_answer_1 = randrange(0,df_answers.last_valid_index())
+                    randon_answers_numbers_list.append(wrong_answer_1)
+
+                    wrong_answer_2 = randrange(0,df_answers.last_valid_index())
+                    while wrong_answer_2 in randon_answers_numbers_list:
+                        wrong_answer_2 = randrange(0,df_answers.last_valid_index())
+                    randon_answers_numbers_list.append(wrong_answer_2)
+
+                    wrong_answer_3 = randrange(0,df_answers.last_valid_index())
+                    while wrong_answer_3 in randon_answers_numbers_list:
+                        wrong_answer_3 = randrange(0,df_answers.last_valid_index())
+                    randon_answers_numbers_list.append(wrong_answer_3)
+
+                    wrong_answer_1 = df_answers.loc[wrong_answer_1,'translation'].replace('<br>','')[:75]
+                    wrong_answer_2 = df_answers.loc[wrong_answer_2,'translation'].replace('<br>','')[:75]
+                    wrong_answer_3 = df_answers.loc[wrong_answer_3,'translation'].replace('<br>','')[:75]
+
+                    if random_number == 1:
+                        df_aux.loc[0,'Answer 1 - max 75 characters'] = correct_answer
+                        df_aux.loc[0,'Answer 2 - max 75 characters'] = wrong_answer_1
+                        df_aux.loc[0,'Answer 3 - max 75 characters'] = wrong_answer_2
+                        df_aux.loc[0,'Answer 4 - max 75 characters'] = wrong_answer_3
+
+                    elif random_number == 2:
+                        df_aux.loc[0,'Answer 1 - max 75 characters'] = wrong_answer_1
+                        df_aux.loc[0,'Answer 2 - max 75 characters'] = correct_answer
+                        df_aux.loc[0,'Answer 3 - max 75 characters'] = wrong_answer_2
+                        df_aux.loc[0,'Answer 4 - max 75 characters'] = wrong_answer_3
+
+                    elif random_number == 3:
+                        df_aux.loc[0,'Answer 1 - max 75 characters'] = wrong_answer_1
+                        df_aux.loc[0,'Answer 2 - max 75 characters'] = wrong_answer_2
+                        df_aux.loc[0,'Answer 3 - max 75 characters'] = correct_answer
+                        df_aux.loc[0,'Answer 4 - max 75 characters'] = wrong_answer_3
+
+                    elif random_number == 4:
+                        df_aux.loc[0,'Answer 1 - max 75 characters'] = wrong_answer_1
+                        df_aux.loc[0,'Answer 2 - max 75 characters'] = wrong_answer_2
+                        df_aux.loc[0,'Answer 3 - max 75 characters'] = wrong_answer_3
+                        df_aux.loc[0,'Answer 4 - max 75 characters'] = correct_answer
+
+                    df_kahoot_template = df_kahoot_template.append(df_aux)
+                
+                df_kahoot_template = df_kahoot_template.reset_index(drop = True)
+                template_filename = f'kahoot_sherlock_{tag}.xlsx'
+                
+                df_kahoot_template.to_excel(kahoot_templates_path+template_filename, sheet_name='Sheet1', startrow=7, startcol=0)
+
+        print(f'You can find your Kahoot Templates in {currentDirectory}\\kahoot_templates\\ ')
         print('Enjoy! ;D')

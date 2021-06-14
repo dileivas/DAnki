@@ -25,6 +25,6 @@ setup(
     ],
     packages=["DAnki"],
     include_package_data=True,
-    install_requires=["pandas", "googletrans", "pyenchant", "requests", "bs4", "treetaggerwrapper", "gtts", "genanki",],
+    install_requires=["pandas", "googletrans>=3.0.0", "pyenchant", "requests", "bs4", "treetaggerwrapper", "gtts", "genanki",],
     keywords=['anki', 'flashcards', 'memorization', 'german', 'deutsch',]
     )
